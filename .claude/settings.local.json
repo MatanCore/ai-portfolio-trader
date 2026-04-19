@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip install *)",
+      "Bash(python3 -m pip --version)",
+      "Bash(python3 -m pip install --user -r requirements.txt)",
+      "Bash(python3 -m pip install --user pytest apscheduler)",
+      "Bash(ADMIN_TOKEN=test ANTHROPIC_API_KEY=test python3 -m pytest tests/ -v)",
+      "Bash(ADMIN_TOKEN=test ANTHROPIC_API_KEY=test python3 -m pytest tests/)",
+      "Bash(curl -s https://pypi.org/pypi/claude-agent-sdk/json)",
+      "Bash(python3 -c \"import sys, json; d = json.load\\(sys.stdin\\); print\\('Version:', d['info']['version']\\); print\\('Requires Python:', d['info'].get\\('requires_python'\\)\\); print\\('Requires Dist:', d['info'].get\\('requires_dist'\\)\\); print\\('---'\\); print\\(d['info']['description'][:3000]\\)\")",
+      "Bash(brew install *)",
+      "Bash(python3.11 --version)",
+      "Bash(openssl rand *)",
+      "Bash(sed -i '' 's/^ADMIN_TOKEN=.*/ADMIN_TOKEN=__TRACKED_VAR__/' .env)",
+      "Bash(curl -s http://localhost:8000/api/health)",
+      "Bash(lsof -ti:8000)",
+      "Bash(xargs kill *)",
+      "Bash(echo \"Port free: $\\(lsof -ti:8000)",
+      "Bash(curl -s -o /dev/null -w \"DASHBOARD: HTTP %{http_code}\\\\n\" http://localhost:8000/)",
+      "Bash(curl -s -o /dev/null -w \"POSITIONS: HTTP %{http_code}\\\\n\" http://localhost:8000/positions)",
+      "Bash(curl -s -o /dev/null -w \"DECISIONS: HTTP %{http_code}\\\\n\" http://localhost:8000/decisions)",
+      "Bash(curl -s -X POST 'http://localhost:8000/api/run-now-sync?force=true' -H 'X-Admin-Token: ab63857b5d5766916750cde65d305fdb' --max-time 600)",
+      "Bash(curl -s -X POST http://localhost:8000/api/run-now -H \"X-Admin-Token: ab63857b5d5766916750cde65d305fdb\")"
+    ]
+  }
+}

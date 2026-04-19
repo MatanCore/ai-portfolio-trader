@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Decision {{ decision.decision_date if decision else '' }} — AI Portfolio{% endblock %}
+{% block content %}
+<a href="/decisions" class="btn btn-sm btn-outline-secondary mb-3">← Back to log</a>
+
+{% if not decision %}
+<div class="alert alert-warning">No decision found for this date.</div>
+{% else %}
+
+<div class="card mb-3"><div class="card-body">
+  <h4 class="mb-2">
+    {{ decision.decision_date }}
+    <span class="badge
+      {% if decision.action == 'BUY' %}bg-success
+      {% elif decision.action == 'SELL' %}bg-danger
+      {% else %}bg-secondary{% endif %}">{{ decision.action }}</span>
+    <span class="text-muted">conf {{ "%.2f"|format(decision.confidence) }}</span>
+  </h4>
+
+  <div class="row small text-muted mb-3">
+    <div class="col-md-3">Signals active: <b>{{ decision.signals_active }}/4</b></div>
+    <div class="col-md-3">VIX: <b>{{ decision.vix_value or '—' }}</b></div>
+    <div class="col-md-3">F&amp;G: <b>{{ decision.fear_greed_value or '—' }}</b></div>
+    <div class="col-md-3">S5FI: <b>{{ "%.1f"|format(decision.s5fi_value) if decision.s5fi_value else '—' }}</b></div>
+  </div>
+
+  <h6>Market Assessment</h6>
+  <p>{{ decision.market_assessment }}</p>
+
+  <h6>Notes / Reasoning</h6>
+  <p style="white-space:pre-wrap">{{ decision.notes }}</p>
+</div></div>
+
+{% if mcl %}
+<div class="card mb-3"><div class="card-body">
+  <h5 class="card-title">Market Context Snapshot</h5>
+  <div class="row small">
+    <div class="col-md-2">VIX: <b>{{ mcl.vix or '—' }}</b></div>
+    <div class="col-md-3">F&amp;G: <b>{{ mcl.fear_greed_value or '—' }}</b> ({{ mcl.fear_greed_label or '—' }})</div>
+    <div class="col-md-2">S5FI: <b>{{ "%.1f"|format(mcl.s5fi) if mcl.s5fi else '—' }}</b></div>
+    <div class="col-md-2">SPY: ${{ "%.2f"|format(mcl.spy_close) if mcl.spy_close else '—' }}</div>
+    <div class="col-md-3">SPY 5d: {{ "%+.2f"|format(mcl.spy_5d_return) if mcl.spy_5d_return is not none else '—' }}%</div>
+  </div>
+</div></div>
+{% endif %}
+
+<div class="card mb-3"><div class="card-body">
+  <h5 class="card-title">Orders ({{ orders|length }})</h5>
+  {% if orders %}
+  {% for o in orders %}
+  <div class="border rounded p-3 mb-2">
+    <div class="d-flex justify-content-between">
+      <div>
+        <span class="badge {% if o.action == 'BUY' %}bg-success{% else %}bg-danger{% endif %}">{{ o.action }}</span>
+        <b>{{ o.ticker }}</b>
+        &nbsp;{{ "%.4f"|format(o.shares) }} @ ${{ "%.2f"|format(o.price) }}
+        = <b>${{ "%.2f"|format(o.total_value) }}</b>
+      </div>
+      <div class="text-muted small">{{ "%.2f"|format(o.allocation_pct) }}% of NAV</div>
+    </div>
+    {% if o.thesis %}<div class="mt-2 small"><b>Thesis:</b> {{ o.thesis }}</div>{% endif %}
+    {% if o.risk_note %}<div class="small"><b>Risk:</b> {{ o.risk_note }}</div>{% endif %}
+    {% if o.trailing_stop_override_pct %}
+      <div class="small"><b>Trailing stop override:</b> {{ o.trailing_stop_override_pct }}%
+        — {{ o.trailing_stop_justification }}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+  {% else %}
+  <p class="text-muted mb-0">No orders placed (HOLD).</p>
+  {% endif %}
+</div></div>
+
+<div class="card mb-3"><div class="card-body">
+  <h5 class="card-title">Token Usage</h5>
+  <div class="row small">
+    <div class="col-md-3">Input: <b>{{ decision.input_tokens }}</b></div>
+    <div class="col-md-3">Output: <b>{{ decision.output_tokens }}</b></div>
+    <div class="col-md-3">Cache read: <b>{{ decision.cache_read_tokens }}</b></div>
+    <div class="col-md-3">Duration: <b>{{ "%.1f"|format(decision.duration_seconds) }}s</b></div>
+  </div>
+</div></div>
+
+<div class="card"><div class="card-body">
+  <h5 class="card-title">Raw JSON</h5>
+  <pre class="bg-light p-3 small mb-0" style="max-height:400px;overflow:auto">{{ raw_json_pretty }}</pre>
+</div></div>
+
+{% endif %}
+{% endblock %}

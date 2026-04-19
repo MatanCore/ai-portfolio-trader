@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Positions — AI Portfolio{% endblock %}
+{% block content %}
+<h3 class="mb-3">Open Positions ({{ open_positions|length }})</h3>
+<div class="card mb-4"><div class="card-body p-0">
+  <table class="table table-sm mb-0">
+    <thead>
+      <tr>
+        <th class="ps-3">Ticker</th><th>Type</th><th>Shares</th>
+        <th>Entry</th><th>Current</th><th>Highest</th>
+        <th>P&amp;L $</th><th>P&amp;L %</th><th>Trailing Stop</th><th>Entered</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in open_positions %}
+      <tr>
+        <td class="ps-3"><b>{{ p.ticker }}</b></td>
+        <td>{{ p.asset_type }}</td>
+        <td>{{ "%.4f"|format(p.shares) }}</td>
+        <td>${{ "%.2f"|format(p.entry_price) }}</td>
+        <td>${{ "%.2f"|format(p.current_price) }}</td>
+        <td>${{ "%.2f"|format(p.highest_price) }}</td>
+        <td class="{% if p.unrealized_pnl >= 0 %}text-success{% else %}text-danger{% endif %}">
+          ${{ "%+.2f"|format(p.unrealized_pnl) }}
+        </td>
+        <td class="{% if p.unrealized_pnl_pct >= 0 %}text-success{% else %}text-danger{% endif %}">
+          {{ "%+.2f"|format(p.unrealized_pnl_pct) }}%
+        </td>
+        <td>
+          {% if p.trailing_stop_active %}
+            <span class="badge bg-warning text-dark">
+              Active @ {{ "%.1f"|format(p.trailing_stop_pct) }}%
+              {% if p.trailing_stop_price %}(≈${{ "%.2f"|format(p.trailing_stop_price) }}){% endif %}
+            </span>
+          {% else %}
+            <span class="text-muted small">{{ "%.0f"|format(p.trailing_stop_pct) }}% (dormant)</span>
+          {% endif %}
+        </td>
+        <td class="text-muted small">{{ p.entry_date }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="10" class="p-4 text-center text-muted">No open positions.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div></div>
+
+<h3 class="mb-3">Recently Closed ({{ closed_positions|length }})</h3>
+<div class="card"><div class="card-body p-0">
+  <table class="table table-sm mb-0">
+    <thead>
+      <tr>
+        <th class="ps-3">Ticker</th><th>Type</th><th>Shares</th>
+        <th>Entry</th><th>Exit</th><th>Realized P&amp;L</th>
+        <th>Reason</th><th>Entered</th><th>Exited</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in closed_positions %}
+      <tr>
+        <td class="ps-3"><b>{{ p.ticker }}</b></td>
+        <td>{{ p.asset_type }}</td>
+        <td>{{ "%.4f"|format(p.shares) }}</td>
+        <td>${{ "%.2f"|format(p.entry_price) }}</td>
+        <td>${{ "%.2f"|format(p.exit_price) if p.exit_price else '—' }}</td>
+        <td class="{% if p.realized_pnl and p.realized_pnl >= 0 %}text-success{% else %}text-danger{% endif %}">
+          ${{ "%+.2f"|format(p.realized_pnl) if p.realized_pnl is not none else '—' }}
+        </td>
+        <td class="small">{{ p.exit_reason or '—' }}</td>
+        <td class="text-muted small">{{ p.entry_date }}</td>
+        <td class="text-muted small">{{ p.exit_date }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="9" class="p-4 text-center text-muted">No closed positions yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div></div>
+{% endblock %}

@@ -1,0 +1,15 @@
+INFO:     Started server process [99441]
+INFO:     Waiting for application startup.
+2026-04-19 09:52:00,186 [INFO] apscheduler.scheduler: Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-04-19 09:52:00,187 [INFO] apscheduler.scheduler: Added job "daily_job" to job store "default"
+2026-04-19 09:52:00,187 [INFO] apscheduler.scheduler: Scheduler started
+2026-04-19 09:52:00,187 [INFO] scheduler.jobs: Scheduler started — daily at 16:30 ET
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2026-04-19 09:52:00,299 [INFO] notifications.telegram_bot: Telegram bot started — polling for commands
+2026-04-19 09:52:00,300 [ERROR] notifications.telegram_bot: Bot polling failed: set_wakeup_fd only works in main thread of the main interpreter
+/Users/matanfishel/בוט רווחים/notifications/telegram_bot.py:172: RuntimeWarning: coroutine 'Updater.start_polling' was never awaited
+  logger.error(f"Bot polling failed: {e}")
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+INFO:     127.0.0.1:57184 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57274 - "GET / HTTP/1.1" 200 OK

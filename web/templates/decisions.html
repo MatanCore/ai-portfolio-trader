@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Decisions — AI Portfolio{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="mb-0">Decision Log</h3>
+  <div class="btn-group btn-group-sm">
+    <a href="/decisions" class="btn {% if not filter_action %}btn-primary{% else %}btn-outline-primary{% endif %}">All</a>
+    <a href="/decisions?action=BUY" class="btn {% if filter_action == 'BUY' %}btn-primary{% else %}btn-outline-primary{% endif %}">BUY</a>
+    <a href="/decisions?action=SELL" class="btn {% if filter_action == 'SELL' %}btn-primary{% else %}btn-outline-primary{% endif %}">SELL</a>
+    <a href="/decisions?action=HOLD" class="btn {% if filter_action == 'HOLD' %}btn-primary{% else %}btn-outline-primary{% endif %}">HOLD</a>
+  </div>
+</div>
+
+<div class="card"><div class="card-body p-0">
+  <table class="table table-hover mb-0">
+    <thead>
+      <tr>
+        <th class="ps-3">Date</th>
+        <th>Action</th>
+        <th>Confidence</th>
+        <th>Signals</th>
+        <th>VIX</th>
+        <th>F&amp;G</th>
+        <th>Notes (preview)</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for d in decisions %}
+      <tr>
+        <td class="ps-3">{{ d.decision_date }}</td>
+        <td>
+          <span class="badge
+            {% if d.action == 'BUY' %}bg-success
+            {% elif d.action == 'SELL' %}bg-danger
+            {% else %}bg-secondary{% endif %}">{{ d.action }}</span>
+        </td>
+        <td>{{ "%.2f"|format(d.confidence) }}</td>
+        <td>{{ d.signals_active }}/4</td>
+        <td>{{ "%.1f"|format(d.vix_value) if d.vix_value else '—' }}</td>
+        <td>{{ "%.0f"|format(d.fear_greed_value) if d.fear_greed_value else '—' }}</td>
+        <td class="text-truncate" style="max-width:380px">{{ (d.notes or '')[:140] }}</td>
+        <td><a href="/decisions/{{ d.decision_date }}" class="btn btn-sm btn-outline-primary">Open</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8" class="p-4 text-center text-muted">No decisions yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div></div>
+
+<div class="d-flex justify-content-between mt-3">
+  <span class="text-muted small">Showing {{ decisions|length }} of {{ total }}</span>
+  <div>
+    {% if page > 1 %}
+      <a class="btn btn-sm btn-outline-secondary"
+         href="/decisions?page={{ page - 1 }}{% if filter_action %}&action={{ filter_action }}{% endif %}">← Prev</a>
+    {% endif %}
+    {% if has_next %}
+      <a class="btn btn-sm btn-outline-secondary"
+         href="/decisions?page={{ page + 1 }}{% if filter_action %}&action={{ filter_action }}{% endif %}">Next →</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
