@@ -21,7 +21,13 @@
       "Bash(curl -s -o /dev/null -w \"POSITIONS: HTTP %{http_code}\\\\n\" http://localhost:8000/positions)",
       "Bash(curl -s -o /dev/null -w \"DECISIONS: HTTP %{http_code}\\\\n\" http://localhost:8000/decisions)",
       "Bash(curl -s -X POST 'http://localhost:8000/api/run-now-sync?force=true' -H 'X-Admin-Token: ab63857b5d5766916750cde65d305fdb' --max-time 600)",
-      "Bash(curl -s -X POST http://localhost:8000/api/run-now -H \"X-Admin-Token: ab63857b5d5766916750cde65d305fdb\")"
+      "Bash(curl -s -X POST http://localhost:8000/api/run-now -H \"X-Admin-Token: ab63857b5d5766916750cde65d305fdb\")",
+      "Bash(tailscale version *)",
+      "Bash(brew services *)",
+      "Bash(tailscale status *)",
+      "Bash(awk '{print $2}')",
+      "Bash(curl -s -X POST http://localhost:8000/api/run-now -H 'X-Admin-Token: ab63857b5d5766916750cde65d305fdb' -H 'Content-Type: application/json')",
+      "Bash(claude --version)"
     ]
   }
 }

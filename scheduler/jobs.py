@@ -245,13 +245,15 @@ def daily_job() -> dict:
                 }
                 for a in applied if not a.rejected
             ]
-            if order_dicts or decision.action != "HOLD":
+            candidates_dicts = [c.model_dump() for c in decision.candidates] if decision.candidates else []
+            should_notify = order_dicts or decision.action != "HOLD" or len(candidates_dicts) > 0
+            if should_notify:
                 subj, body = format_decision_email(
-                    today.isoformat(), decision.action, order_dicts, snap.total_nav, snap.cash
+                    today.isoformat(), decision.action, order_dicts, snap.total_nav, snap.cash, candidates_dicts
                 )
                 send_email(subj, body)
                 send_telegram(format_decision_telegram(
-                    today.isoformat(), decision.action, order_dicts, snap.total_nav
+                    today.isoformat(), decision.action, order_dicts, snap.total_nav, candidates_dicts
                 ))
 
             return {

@@ -40,12 +40,21 @@ class OrderSchema(BaseModel):
     trailing_stop_justification: str | None = None
 
 
+class CandidateSchema(BaseModel):
+    ticker: str
+    thesis: str
+    trigger: str
+    risk_level: Literal["low", "medium", "high"]
+    confidence: confloat(ge=0.0, le=1.0)
+
+
 class DecisionSchema(BaseModel):
     action: Literal["BUY", "SELL", "HOLD"]
     confidence: confloat(ge=0.0, le=1.0) = Field(...)
     market_assessment: str
     notes: str = ""
     orders: list[OrderSchema] = []
+    candidates: list[CandidateSchema] = []
 
 
 @dataclass

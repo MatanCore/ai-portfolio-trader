@@ -36,7 +36,24 @@ def send_telegram(text: str) -> bool:
         return False
 
 
-def format_decision_telegram(today_iso: str, action: str, orders: list[dict], nav: float) -> str:
+def format_candidates_block(candidates: list[dict]) -> str:
+    """Format buy candidates for display in notifications."""
+    if not candidates:
+        return "No immediate buy candidates. Market conditions do not justify entry yet."
+    lines = ["<b>Buy Candidates (monitor for entry):</b>"]
+    for c in candidates[:5]:  # Limit to top 5
+        ticker = c.get("ticker", "?")
+        thesis = c.get("thesis", "")[:100]  # Truncate thesis to 100 chars
+        trigger = c.get("trigger", "")[:100]
+        risk = c.get("risk_level", "?")
+        conf = int(c.get("confidence", 0) * 100)
+        lines.append(f"• <b>{ticker}</b> — {thesis} (risk: {risk.upper()}, {conf}% confidence)")
+        if trigger:
+            lines.append(f"  Entry: {trigger}")
+    return "\n".join(lines)
+
+
+def format_decision_telegram(today_iso: str, action: str, orders: list[dict], nav: float, candidates: list[dict] | None = None) -> str:
     lines = [f"<b>AI Portfolio — {today_iso}</b>", f"Action: <b>{action}</b>", f"NAV: ${nav:,.2f}"]
     if orders:
         lines.append("\n<b>Orders:</b>")
@@ -45,4 +62,7 @@ def format_decision_telegram(today_iso: str, action: str, orders: list[dict], na
                 f"• {o.get('action')} {o.get('shares', 0):.4f} {o.get('ticker')} "
                 f"@ ${o.get('price', 0):.2f}"
             )
+    if candidates is None:
+        candidates = []
+    lines.append(f"\n{format_candidates_block(candidates)}")
     return "\n".join(lines)

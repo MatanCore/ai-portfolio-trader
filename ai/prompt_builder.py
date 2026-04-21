@@ -34,6 +34,17 @@ These are HIGH-PRIORITY considerations, not automatic triggers. Score them toget
 - 4 signals: Strongest contrarian environment; act with conviction if cash allows.
 You MAY choose to HOLD even with active signals — but you MUST explain why in the notes field.
 
+## Potential Buy Candidates
+Even when action is HOLD, scan the universe for 3–5 "near-entry" opportunities.
+Return candidates in the "candidates" field with:
+- ticker: asset symbol
+- thesis: 1-sentence conviction (e.g., "oversold on breadth divergence")
+- trigger: specific entry condition (e.g., "close below 5-day low", "break above 50-MA on volume")
+- risk_level: "low" | "medium" | "high" (volatility and signal confirmation strength)
+- confidence: float in [0.0, 1.0] (probability entry signal triggers within 5 trading days)
+
+Rank candidates by confidence descending. Return empty array [] if market environment doesn't justify monitoring.
+
 ## Output Contract
 Return STRICT JSON ONLY. No prose, no markdown, no code fences.
 
@@ -54,6 +65,15 @@ Schema:
        "risk_note": string,
        "trailing_stop_override_pct": float | null,
        "trailing_stop_justification": string | null
+     }
+  ],
+  "candidates": [
+     {
+       "ticker": string,
+       "thesis": string,
+       "trigger": string,
+       "risk_level": "low" | "medium" | "high",
+       "confidence": float in [0.0, 1.0]
      }
   ]
 }

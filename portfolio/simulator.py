@@ -98,6 +98,9 @@ def apply_orders(
             if pos is None:
                 applied.append(AppliedOrder(o.ticker, "SELL", 0, o.price, 0, 0, rejected=True, reject_reason="no open position"))
                 continue
+            if o.shares is not None and o.shares <= 0:
+                applied.append(AppliedOrder(o.ticker, "SELL", 0, o.price, 0, 0, rejected=True, reject_reason="invalid shares <= 0"))
+                continue
             sell_shares = o.shares if o.shares and o.shares < pos.shares else pos.shares
             proceeds = sell_shares * o.price
             realized = (o.price - pos.entry_price) * sell_shares

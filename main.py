@@ -1,5 +1,8 @@
 """Entry point — starts FastAPI + APScheduler on port 8000."""
+import os
 import uvicorn
+
+os.environ.setdefault("PYTHONUNBUFFERED", "1")
 
 from web.app import app  # noqa: F401 — imported to initialize app + scheduler
 

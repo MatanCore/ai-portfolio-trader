@@ -36,7 +36,24 @@ def send_email(subject: str, body: str) -> bool:
         return False
 
 
-def format_decision_email(today_iso: str, action: str, orders: list[dict], nav: float, cash: float) -> tuple[str, str]:
+def format_candidates_email_block(candidates: list[dict]) -> str:
+    """Format buy candidates for email."""
+    if not candidates:
+        return "No immediate buy candidates. Market conditions do not justify entry yet."
+    lines = ["Buy Candidates (monitor for entry):"]
+    for c in candidates[:5]:
+        ticker = c.get("ticker", "?")
+        thesis = c.get("thesis", "")[:100]
+        trigger = c.get("trigger", "")[:100]
+        risk = c.get("risk_level", "?")
+        conf = int(c.get("confidence", 0) * 100)
+        lines.append(f"  {ticker}: {thesis} (risk: {risk}, {conf}% confidence)")
+        if trigger:
+            lines.append(f"    Entry: {trigger}")
+    return "\n".join(lines)
+
+
+def format_decision_email(today_iso: str, action: str, orders: list[dict], nav: float, cash: float, candidates: list[dict] | None = None) -> tuple[str, str]:
     subject = f"[AI Portfolio] {today_iso} — {action} ({len(orders)} orders) | NAV ${nav:,.2f}"
     lines = [
         f"Date: {today_iso}",
@@ -52,4 +69,8 @@ def format_decision_email(today_iso: str, action: str, orders: list[dict], nav: 
             f"  - {o.get('action')} {o.get('shares', 0):.4f} {o.get('ticker')} @ ${o.get('price', 0):.2f}  "
             f"= ${o.get('total_value', 0):,.2f}"
         )
+    if candidates is None:
+        candidates = []
+    lines.append("")
+    lines.append(format_candidates_email_block(candidates))
     return subject, "\n".join(lines)
