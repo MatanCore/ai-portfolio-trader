@@ -27,7 +27,10 @@
       "Bash(tailscale status *)",
       "Bash(awk '{print $2}')",
       "Bash(curl -s -X POST http://localhost:8000/api/run-now -H 'X-Admin-Token: ab63857b5d5766916750cde65d305fdb' -H 'Content-Type: application/json')",
-      "Bash(claude --version)"
+      "Bash(claude --version)",
+      "Bash(launchctl stop *)",
+      "Bash(launchctl start *)",
+      "Bash(launchctl list *)"
     ]
   }
 }

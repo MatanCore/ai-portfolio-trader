@@ -288,6 +288,7 @@ def start_scheduler() -> BackgroundScheduler:
         replace_existing=True,
         max_instances=1,
         coalesce=True,
+        misfire_grace_time=600,  # Allow up to 10 minutes late before skipping
     )
     scheduler.start()
     logger.info(
