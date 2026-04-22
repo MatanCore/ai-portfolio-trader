@@ -36,41 +36,42 @@ def send_email(subject: str, body: str) -> bool:
         return False
 
 
-def format_candidates_email_block(candidates: list[dict]) -> str:
-    """Format buy candidates for email."""
-    if not candidates:
-        return "No immediate buy candidates. Market conditions do not justify entry yet."
-    lines = ["Buy Candidates (monitor for entry):"]
-    for c in candidates[:5]:
-        ticker = c.get("ticker", "?")
-        thesis = c.get("thesis", "")[:100]
-        trigger = c.get("trigger", "")[:100]
-        risk = c.get("risk_level", "?")
-        conf = int(c.get("confidence", 0) * 100)
-        lines.append(f"  {ticker}: {thesis} (risk: {risk}, {conf}% confidence)")
+def format_watchlist_email_block(watchlist: list[dict]) -> str:
+    """Format watchlist for email."""
+    if not watchlist:
+        return "No immediate watchlist setups. No valid entry conditions identified."
+    lines = ["Watchlist (near-entry setups):"]
+    for w in watchlist[:5]:
+        ticker = w.get("ticker", "?")
+        setup = w.get("setup", "")[:100]
+        trigger = w.get("trigger", "")[:100]
+        notes = w.get("notes", "")[:100]
+        lines.append(f"  {ticker}: {setup}")
         if trigger:
-            lines.append(f"    Entry: {trigger}")
+            lines.append(f"    Trigger: {trigger}")
+        if notes:
+            lines.append(f"    Notes: {notes}")
     return "\n".join(lines)
 
 
-def format_decision_email(today_iso: str, action: str, orders: list[dict], nav: float, cash: float, candidates: list[dict] | None = None) -> tuple[str, str]:
-    subject = f"[AI Portfolio] {today_iso} — {action} ({len(orders)} orders) | NAV ${nav:,.2f}"
+def format_decision_email(today_iso: str, action: str, orders: list[dict], nav: float, cash: float, watchlist: list[dict] | None = None) -> tuple[str, str]:
+    subject = f"[AI Portfolio] {today_iso} — {action} ({len(orders)} positions) | NAV ${nav:,.2f}"
     lines = [
         f"Date: {today_iso}",
         f"Action: {action}",
         f"NAV: ${nav:,.2f}   Cash: ${cash:,.2f}",
         "",
-        "Orders:",
+        "Positions Entered:",
     ]
     if not orders:
-        lines.append("  (no orders)")
+        lines.append("  (none)")
     for o in orders:
         lines.append(
             f"  - {o.get('action')} {o.get('shares', 0):.4f} {o.get('ticker')} @ ${o.get('price', 0):.2f}  "
             f"= ${o.get('total_value', 0):,.2f}"
         )
-    if candidates is None:
-        candidates = []
+    if watchlist is None:
+        watchlist = []
     lines.append("")
-    lines.append(format_candidates_email_block(candidates))
+    lines.append(format_watchlist_email_block(watchlist))
     return subject, "\n".join(lines)

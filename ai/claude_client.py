@@ -27,34 +27,32 @@ from config.settings import settings
 logger = logging.getLogger(__name__)
 
 
-class OrderSchema(BaseModel):
+class PositionSchema(BaseModel):
     ticker: str
-    action: Literal["BUY", "SELL"]
-    asset_type: Literal["stock", "crypto"]
-    price: float
-    allocation_pct: float | None = None
-    shares: float | None = None
-    thesis: str = ""
-    risk_note: str = ""
-    trailing_stop_override_pct: float | None = None
-    trailing_stop_justification: str | None = None
-
-
-class CandidateSchema(BaseModel):
-    ticker: str
-    thesis: str
-    trigger: str
+    strategy: Literal["BREAKOUT", "CONSOLIDATION_BREAKOUT", "TREND_CONTINUATION", "OVERSOLD_REVERSAL", "EVENT_MOMENTUM"]
+    entry_reason: str
+    entry_price: float
+    stop_loss: float
+    take_profit: float
+    risk_reward: float
     risk_level: Literal["low", "medium", "high"]
+    risk_pct: confloat(ge=1.0, le=3.0) = 2.0
     confidence: confloat(ge=0.0, le=1.0)
+
+
+class WatchlistItem(BaseModel):
+    ticker: str
+    setup: str
+    trigger: str
+    notes: str = ""
 
 
 class DecisionSchema(BaseModel):
     action: Literal["BUY", "SELL", "HOLD"]
     confidence: confloat(ge=0.0, le=1.0) = Field(...)
-    market_assessment: str
-    notes: str = ""
-    orders: list[OrderSchema] = []
-    candidates: list[CandidateSchema] = []
+    positions: list[PositionSchema] = []
+    watchlist: list[WatchlistItem] = []
+    reasoning: str
 
 
 @dataclass

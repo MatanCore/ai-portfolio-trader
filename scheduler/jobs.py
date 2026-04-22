@@ -25,7 +25,7 @@ from data.market_data import (
     three_red_days,
 )
 from data.s5fi import compute_s5fi
-from data.universe import all_crypto_ids, all_stock_tickers, crypto_symbol
+from data.universe import CRYPTO_SYMBOL_MAP, all_crypto_ids, all_stock_tickers, crypto_symbol
 from db.database import SessionLocal
 from db.models import DailyDecision, MarketContextLog
 from notifications.email_sender import format_decision_email, send_email
@@ -193,24 +193,28 @@ def daily_job() -> dict:
             logger.info("[13/16] Calling Claude")
             result = get_decision(system_prompt, user_prompt)
             decision = result.decision
-            logger.info(f"  Decision: {decision.action} (conf={decision.confidence:.2f}, orders={len(decision.orders)})")
+            logger.info(f"  Decision: {decision.action} (conf={decision.confidence:.2f}, positions={len(decision.positions)})")
 
             logger.info("[14/16] Applying orders")
-            order_inputs = [
-                OrderInput(
-                    ticker=o.ticker,
-                    action=o.action,
-                    asset_type=o.asset_type,
-                    price=o.price,
-                    shares=o.shares,
-                    allocation_pct=o.allocation_pct,
-                    thesis=o.thesis,
-                    risk_note=o.risk_note,
-                    trailing_stop_override_pct=o.trailing_stop_override_pct,
-                    trailing_stop_justification=o.trailing_stop_justification,
-                )
-                for o in decision.orders
-            ]
+            order_inputs = []
+            crypto_symbols = set(CRYPTO_SYMBOL_MAP.values())
+            for p in decision.positions:
+                risk_per_share = p.entry_price - p.stop_loss
+                if risk_per_share <= 0:
+                    logger.warning(f"  Skipping {p.ticker}: invalid stop loss ({p.stop_loss} >= {p.entry_price})")
+                    continue
+                risk_amount = state.total_nav * (p.risk_pct / 100.0)
+                shares = risk_amount / risk_per_share
+                asset_type = "crypto" if p.ticker.upper() in crypto_symbols else "stock"
+                order_inputs.append(OrderInput(
+                    ticker=p.ticker,
+                    action="BUY",
+                    asset_type=asset_type,
+                    price=p.entry_price,
+                    shares=shares,
+                    thesis=p.entry_reason,
+                    risk_note=f"Stop: ${p.stop_loss} | Target: ${p.take_profit} | RR: {p.risk_reward} | Strategy: {p.strategy}",
+                ))
             applied = apply_orders(db, order_inputs, today)
 
             logger.info("[15/16] Saving DailyDecision + PortfolioSnapshot")
@@ -218,8 +222,8 @@ def daily_job() -> dict:
                 decision_date=today,
                 action=decision.action,
                 confidence=decision.confidence,
-                market_assessment=decision.market_assessment,
-                notes=decision.notes,
+                market_assessment="",
+                notes=decision.reasoning,
                 raw_json=json.dumps(decision.model_dump(), default=str),
                 input_tokens=result.input_tokens,
                 output_tokens=result.output_tokens,
@@ -245,15 +249,15 @@ def daily_job() -> dict:
                 }
                 for a in applied if not a.rejected
             ]
-            candidates_dicts = [c.model_dump() for c in decision.candidates] if decision.candidates else []
-            should_notify = order_dicts or decision.action != "HOLD" or len(candidates_dicts) > 0
+            watchlist_dicts = [w.model_dump() for w in decision.watchlist] if decision.watchlist else []
+            should_notify = order_dicts or decision.action != "HOLD" or len(watchlist_dicts) > 0
             if should_notify:
                 subj, body = format_decision_email(
-                    today.isoformat(), decision.action, order_dicts, snap.total_nav, snap.cash, candidates_dicts
+                    today.isoformat(), decision.action, order_dicts, snap.total_nav, snap.cash, watchlist_dicts
                 )
                 send_email(subj, body)
                 send_telegram(format_decision_telegram(
-                    today.isoformat(), decision.action, order_dicts, snap.total_nav, candidates_dicts
+                    today.isoformat(), decision.action, order_dicts, snap.total_nav, watchlist_dicts
                 ))
 
             return {

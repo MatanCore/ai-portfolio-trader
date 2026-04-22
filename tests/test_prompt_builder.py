@@ -9,7 +9,7 @@ def test_system_prompt_contains_rules():
     assert "25%" in p
     assert "20%" in p
     assert "STRICT JSON" in p
-    assert "trailing_stop" in p.lower()
+    assert "trailing" in p.lower()
 
 
 def test_user_prompt_contains_all_sections():

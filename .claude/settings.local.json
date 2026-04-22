@@ -30,7 +30,11 @@
       "Bash(claude --version)",
       "Bash(launchctl stop *)",
       "Bash(launchctl start *)",
-      "Bash(launchctl list *)"
+      "Bash(launchctl list *)",
+      "Bash(sqlite3 portfolio.db \"SELECT decision_date, action, confidence, market_assessment, notes, signals_active, fear_greed_value, vix_value, s5fi_value FROM daily_decision ORDER BY decision_date DESC LIMIT 1;\")",
+      "Bash(sqlite3 portfolio.db \".tables\")",
+      "Bash(sqlite3 portfolio.db \"SELECT decision_date, action, confidence, market_assessment, notes, signals_active, fear_greed_value, vix_value, s5fi_value FROM dailydecision ORDER BY decision_date DESC LIMIT 2;\")",
+      "Bash(sqlite3 portfolio.db \"SELECT decision_date, action, confidence, market_assessment, notes, signals_active, fear_greed_value, vix_value, s5fi_value FROM daily_decisions ORDER BY decision_date DESC LIMIT 2;\")"
     ]
   }
 }
